@@ -1,0 +1,23 @@
+sudo: required
+services:
+  - docker
+
+before_install:
+  - docker build -t codenutridocker/react-test -f ./client/Dockerfile.dev ./client
+
+script:
+  - docker run codenutridocker/react-test npm test -- --coverage
+
+after_success:
+  - docker buit -t codenutridocker/multi-client ./client
+  - docker build -t codenutridocker/multi-nginx ./nginx
+  - docker build -t codenutridocker/multi-server ./server
+  - docker build -t codenutridocker/multi-worker ./worker
+# Take those images and push them to docker hub
+  - echo "$DOCKER_PASSWORD" | docker login -u "$Docker_ID" --password-stdin
+
+# Take those images and push them to docker hub
+  - docker buit -t codenutridocker/multi-client
+  - docker build -t codenutridocker/multi-nginx
+  - docker build -t codenutridocker/multi-server
+  - docker build -t codenutridocker/multi-worker
